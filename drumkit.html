@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drumkit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #dae1d1;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .drumkit {
+      background: #dae1d1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      width: 100%;
+      max-width: 440px;
+    }
+
+    /* ── Waveform Visualizer ── */
+    .waveform-container {
+      background: #028b5a;
+      border-radius: 8px;
+      width: 100%;
+      height: 195px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 6px 9px #2d2451;
+    }
+
+    #waveform {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* ── Instrument Pads ── */
+    .instrument-pads {
+      background: #7d6e78;
+      border-radius: 8px;
+      padding: 32px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .instrument-row {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .row-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #ffffff;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .buttons {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 12px;
+    }
+
+    .drum-btn {
+      background: #9aabbd;
+      border: none;
+      border-radius: 5px;
+      box-shadow: 8px -4px 4px 0 rgba(0, 0, 0, 0.25);
+      flex: 1;
+      aspect-ratio: 1;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 80ms ease, box-shadow 80ms ease, background 80ms ease;
+      outline: none;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .drum-btn:hover {
+      background: #aebecf;
+    }
+
+    .drum-btn:active,
+    .drum-btn.active {
+      transform: translate(4px, -2px);
+      box-shadow: 2px -1px 2px 0 rgba(0, 0, 0, 0.25);
+      background: #c0d3e8;
+    }
+
+    .drum-btn .key-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.75);
+      background: rgba(0, 0, 0, 0.18);
+      border-radius: 4px;
+      padding: 2px 7px;
+      line-height: 1.4;
+      letter-spacing: 0.08em;
+    }
+
+    .drum-btn .pad-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .drum-btn .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.35);
+      transform: scale(0);
+      animation: ripple-anim 400ms ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes ripple-anim {
+      to { transform: scale(4); opacity: 0; }
+    }
+
+    /* ── Keyboard hint bar ── */
+    .hint {
+      font-size: 11px;
+      color: rgba(0,0,0,0.4);
+      text-align: center;
+      padding-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="drumkit">
+
+    <!-- Waveform Visualizer -->
+    <div class="waveform-container">
+      <canvas id="waveform"></canvas>
+    </div>
+
+    <!-- Instrument Pads -->
+    <div class="instrument-pads">
+
+      <div class="instrument-row">
+        <span class="row-label">Kick + Snare</span>
+        <div class="buttons">
+          <button class="drum-btn" data-sound="kick" data-key="A">
+            <span class="key-badge">A</span>
+            <span class="pad-label">Kick</span>
+          </button>
+          <button class="drum-btn" data-sound="snare" data-key="S">
+            <span class="key-badge">S</span>
+            <span class="pad-label">Snare</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="instrument-row">
+        <span class="row-label">Toms</span>
+        <div class="buttons">
+          <button class="drum-btn" data-sound="hi-tom" data-key="D">
+            <span class="key-badge">D</span>
+            <span class="pad-label">Hi Tom</span>
+          </button>
+          <button class="drum-btn" data-sound="lo-tom" data-key="F">
+            <span class="key-badge">F</span>
+            <span class="pad-label">Lo Tom</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="instrument-row">
+        <span class="row-label">Hats</span>
+        <div class="buttons">
+          <button class="drum-btn" data-sound="open-hat" data-key="J">
+            <span class="key-badge">J</span>
+            <span class="pad-label">Open Hat</span>
+          </button>
+          <button class="drum-btn" data-sound="closed-hat" data-key="K">
+            <span class="key-badge">K</span>
+            <span class="pad-label">Closed Hat</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="hint">Press keys A · S · D · F · J · K to play</p>
+  </div>
+
+  <script>
+    // ── Audio Context ──────────────────────────────────────────────────────
+    let audioCtx = null;
+    let analyser = null;
+    let dataArray = null;
+
+    function getAudioCtx() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 1024;
+        analyser.smoothingTimeConstant = 0.82;
+        dataArray = new Uint8Array(analyser.fftSize);
+        analyser.connect(audioCtx.destination);
+      }
+      return audioCtx;
+    }
+
+    // ── Sound Synthesis ────────────────────────────────────────────────────
+    function playSound(type) {
+      const ctx = getAudioCtx();
+
+      const masterGain = ctx.createGain();
+      masterGain.connect(analyser);
+
+      switch (type) {
+        case 'kick': {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(masterGain);
+          osc.frequency.setValueAtTime(180, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.5);
+          gain.gain.setValueAtTime(1, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+          osc.start(); osc.stop(ctx.currentTime + 0.5);
+          break;
+        }
+        case 'snare': {
+          const bufSize = ctx.sampleRate * 0.2;
+          const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+          const data = buf.getChannelData(0);
+          for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1);
+          const src = ctx.createBufferSource();
+          src.buffer = buf;
+          const bpf = ctx.createBiquadFilter();
+          bpf.type = 'bandpass'; bpf.frequency.value = 1800; bpf.Q.value = 0.6;
+          const gain = ctx.createGain();
+          src.connect(bpf); bpf.connect(gain); gain.connect(masterGain);
+          gain.gain.setValueAtTime(0.8, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+          src.start(); src.stop(ctx.currentTime + 0.2);
+          // body tone
+          const osc = ctx.createOscillator();
+          const og = ctx.createGain();
+          osc.connect(og); og.connect(masterGain);
+          osc.frequency.value = 200;
+          og.gain.setValueAtTime(0.6, ctx.currentTime);
+          og.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+          osc.start(); osc.stop(ctx.currentTime + 0.12);
+          break;
+        }
+        case 'hi-tom': {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(masterGain);
+          osc.frequency.setValueAtTime(300, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.35);
+          gain.gain.setValueAtTime(0.9, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+          osc.start(); osc.stop(ctx.currentTime + 0.35);
+          break;
+        }
+        case 'lo-tom': {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(masterGain);
+          osc.frequency.setValueAtTime(160, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.45);
+          gain.gain.setValueAtTime(0.95, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+          osc.start(); osc.stop(ctx.currentTime + 0.45);
+          break;
+        }
+        case 'open-hat': {
+          const bufSize = ctx.sampleRate * 0.5;
+          const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+          const data = buf.getChannelData(0);
+          for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1);
+          const src = ctx.createBufferSource();
+          src.buffer = buf;
+          const hpf = ctx.createBiquadFilter();
+          hpf.type = 'highpass'; hpf.frequency.value = 7000;
+          const gain = ctx.createGain();
+          src.connect(hpf); hpf.connect(gain); gain.connect(masterGain);
+          gain.gain.setValueAtTime(0.5, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+          src.start(); src.stop(ctx.currentTime + 0.5);
+          break;
+        }
+        case 'closed-hat': {
+          const bufSize = ctx.sampleRate * 0.08;
+          const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+          const data = buf.getChannelData(0);
+          for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1);
+          const src = ctx.createBufferSource();
+          src.buffer = buf;
+          const hpf = ctx.createBiquadFilter();
+          hpf.type = 'highpass'; hpf.frequency.value = 9000;
+          const gain = ctx.createGain();
+          src.connect(hpf); hpf.connect(gain); gain.connect(masterGain);
+          gain.gain.setValueAtTime(0.45, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07);
+          src.start(); src.stop(ctx.currentTime + 0.08);
+          break;
+        }
+      }
+    }
+
+    // ── Waveform Visualizer ────────────────────────────────────────────────
+    const canvas = document.getElementById('waveform');
+    const canvasContainer = canvas.parentElement;
+
+    function resizeCanvas() {
+      canvas.width = canvasContainer.offsetWidth;
+      canvas.height = canvasContainer.offsetHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    function drawWaveform() {
+      requestAnimationFrame(drawWaveform);
+      const ctx2d = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+
+      if (!analyser) {
+        // idle state — draw flat line with subtle glow
+        ctx2d.clearRect(0, 0, W, H);
+        ctx2d.strokeStyle = 'rgba(255,255,255,0.25)';
+        ctx2d.lineWidth = 2;
+        ctx2d.shadowBlur = 8;
+        ctx2d.shadowColor = 'rgba(255,255,255,0.3)';
+        ctx2d.beginPath();
+        ctx2d.moveTo(0, H / 2);
+        ctx2d.lineTo(W, H / 2);
+        ctx2d.stroke();
+        ctx2d.shadowBlur = 0;
+        return;
+      }
+
+      analyser.getByteTimeDomainData(dataArray);
+      ctx2d.clearRect(0, 0, W, H);
+
+      // Glow line
+      ctx2d.lineWidth = 3;
+      ctx2d.strokeStyle = 'rgba(180, 255, 200, 0.9)';
+      ctx2d.shadowBlur = 16;
+      ctx2d.shadowColor = 'rgba(100, 255, 150, 0.8)';
+      ctx2d.beginPath();
+
+      const sliceWidth = W / dataArray.length;
+      let x = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = (v * H) / 2;
+        if (i === 0) ctx2d.moveTo(x, y);
+        else ctx2d.lineTo(x, y);
+        x += sliceWidth;
+      }
+      ctx2d.lineTo(W, H / 2);
+      ctx2d.stroke();
+      ctx2d.shadowBlur = 0;
+    }
+    drawWaveform();
+
+    // ── Ripple Effect ──────────────────────────────────────────────────────
+    function addRipple(btn, e) {
+      const rect = btn.getBoundingClientRect();
+      const x = (e.clientX ?? rect.left + rect.width / 2) - rect.left;
+      const y = (e.clientY ?? rect.top + rect.height / 2) - rect.top;
+      const size = Math.max(rect.width, rect.height);
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple';
+      ripple.style.cssText = `width:${size}px;height:${size}px;left:${x - size/2}px;top:${y - size/2}px`;
+      btn.appendChild(ripple);
+      ripple.addEventListener('animationend', () => ripple.remove());
+    }
+
+    // ── Button Activation ──────────────────────────────────────────────────
+    function activateBtn(btn, e) {
+      const sound = btn.dataset.sound;
+      playSound(sound);
+      addRipple(btn, e || {});
+      btn.classList.add('active');
+      setTimeout(() => btn.classList.remove('active'), 120);
+    }
+
+    // ── Mouse / Touch Events ───────────────────────────────────────────────
+    document.querySelectorAll('.drum-btn').forEach(btn => {
+      btn.addEventListener('mousedown', e => activateBtn(btn, e));
+      btn.addEventListener('touchstart', e => {
+        e.preventDefault();
+        activateBtn(btn, e.touches[0]);
+      }, { passive: false });
+    });
+
+    // ── Keyboard Events ────────────────────────────────────────────────────
+    const keyMap = {};
+    document.querySelectorAll('.drum-btn').forEach(btn => {
+      keyMap[btn.dataset.key.toLowerCase()] = btn;
+    });
+
+    const pressedKeys = new Set();
+    document.addEventListener('keydown', e => {
+      const key = e.key.toLowerCase();
+      if (pressedKeys.has(key)) return;
+      pressedKeys.add(key);
+      const btn = keyMap[key];
+      if (btn) activateBtn(btn);
+    });
+    document.addEventListener('keyup', e => {
+      pressedKeys.delete(e.key.toLowerCase());
+    });
+  </script>
+</body>
+</html>
