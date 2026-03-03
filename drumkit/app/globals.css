@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+:root {
+  --background: #dae1d1;
+}
+
+body {
+  background: var(--background);
+  font-family: 'Inter', sans-serif;
+}
+
+/* Ripple animation */
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple-span {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(0);
+  animation: ripple 400ms ease-out forwards;
+  pointer-events: none;
+}
